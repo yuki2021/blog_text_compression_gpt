@@ -1,0 +1,2 @@
+# blog_text_compression_gpt
+自分のブログをOpenAI APIで長文要約する処理
