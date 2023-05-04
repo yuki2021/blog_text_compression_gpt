@@ -55,6 +55,7 @@ class HandleDBData {
 
     /// はてなブログのタグを削除
     public function trimStringData($string) {
+        $string = preg_replace('/<[^>]*>/', '', $string);
         $string = preg_replace('/\[([^一-龠ぁ-んァ-ヴａ-ｚＡ-Ｚ０-９]*)\]/', '', $string);
         $string = str_replace(array("\r\n", "\r", "\n"), "", $string);
         $string = str_replace(array('　', ' '), '', $string);
