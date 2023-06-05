@@ -53,20 +53,44 @@ EOT2;
     }
 
     public function execSendData() {
-        $context = array(
-            'http' => array(
-                'method'  => 'POST',
-                'header'  => implode("\r\n", $this->header),
-                'content' => json_encode($this->send_data)
-            )
-        );
-    
-        $json = file_get_contents($this->endpoint, false, stream_context_create($context));
-    
-        // ここを外すとレスポンスを確認できる。
-        var_dump($http_response_header);
+        global $to_mail;
+        global $from_mail;
 
-        $this->get_data = $json;
+        $maxRetries = 5;
+        $retries = 0;
+        $waitTime = 30;
+    
+        while ($retries < $maxRetries) {
+            $context = array(
+                'http' => array(
+                    'method'  => 'POST',
+                    'header'  => implode("\r\n", $this->header),
+                    'content' => json_encode($this->send_data)
+                )
+            );
+    
+            $json = @file_get_contents($this->endpoint, false, stream_context_create($context));
+            $responseCode = $this->parseHttpResponseCode($http_response_header);
+    
+            if ($responseCode == 200) {
+                $this->get_data = $json;
+                return;
+            } else {
+                $retries++;
+                if ($responseCode == 429) {
+                    $waitTime = 60; // Wait longer if there are too many requests
+                }
+                sleep($waitTime); // Wait before retrying
+            }
+        }
+    
+        $to = $to_mail;
+        $subject = 'OpenAI API Error';
+        $message = "Failed to get valid response from API after {$maxRetries} attempts";
+        $headers = "From: {$from_mail}" . "\r\n";
+        mb_send_mail($to, $subject, $message, $headers);
+
+        throw new Exception($message);
     }
 
     public function formatJSONdata() {
@@ -78,5 +102,11 @@ EOT2;
         $tempHtml .= '<li>' . $jsonArr['choices'][0]['message']['content'] . '</li>';
                 $tempHtml .= '</ul>';
         return $tempHtml;
+    }
+
+    private function parseHttpResponseCode($headers) {
+        $statusLine = $headers[0];
+        preg_match('{HTTP\/\S*\s(\d{3})}', $statusLine, $match);
+        return intval($match[1]);
     }
 }
