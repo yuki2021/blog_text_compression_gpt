@@ -28,13 +28,7 @@ class SentenceSummaryChatGPT {
         
         $prompt = <<<EOT2
  #命令書:
- あなたは高性能な要約マシンです。
- 以下の制約条件と入力文をもとに、要約した日本語の文章を出力してください。
- 
- #制約条件:
- ・文字数は500文字ほど
- ・重要なキーワードを取り残さない。
- ・文章を簡潔に。
+ 入力文を元に文章を要約してください。目的は500字程度の簡潔な文章にすることです。出力するのは要約文のみ。
  
  #入力文:
  {$text}
@@ -43,7 +37,7 @@ class SentenceSummaryChatGPT {
 EOT2;      
         
         $this->send_data = array(
-            'model' => "gpt-3.5-turbo-0301",
+            'model' => "gpt-3.5-turbo",
             'messages' => array(
                 array(
                 'role'=>'user',
