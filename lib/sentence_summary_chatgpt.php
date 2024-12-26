@@ -37,7 +37,7 @@ class SentenceSummaryChatGPT {
 EOT2;      
         
         $this->send_data = array(
-            'model' => "gpt-3.5-turbo",
+            'model' => "gpt-4o-mini",
             'messages' => array(
                 array(
                 'role'=>'user',
